@@ -1,15 +1,8 @@
 import psycopg2
 import json
-from save_defect_history import *
-
+from utils.save_defect_history import store_defect_history
+from config import DB_CONFIG
 # Параметры подключения к базе данных
-DB_CONFIG = {
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
-    "host": "your_host",
-    "port": "your_port",
-}
 
 #интересно, можно ли как-то сократить количество запросов в бд с обновлением истории дефектов
 
