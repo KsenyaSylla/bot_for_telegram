@@ -1,5 +1,5 @@
-from data.defects_dict import defects
-from bot.req_to_db import *
+from utils.defects_dict import defects
+from req_to_db import *
 
 def get_defect(defect):
     defect = str(defect)#на всякий случай приведем к строке, чтобы точно было то, что нам нужно
