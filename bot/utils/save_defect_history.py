@@ -25,7 +25,7 @@ def take_date():
 
 
 #сохранять историю в json строку в БД дефект "номер" включен/отключен "дата"
-def store_defect_history(status):
+async def store_defect_history(status):
     date = take_date()
     defect_history = {
         status: date

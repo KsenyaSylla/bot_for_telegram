@@ -1,5 +1,5 @@
 from data.defects_dict import defects
-from req_to_db import *
+from bot.req_to_db import *
 
 def get_defect(defect):
     defect = str(defect)#на всякий случай приведем к строке, чтобы точно было то, что нам нужно
@@ -40,4 +40,4 @@ def process_defect(resieved_str, action):
         print(f'Ошибка при получении данных по дефекту: {e}')
 
 
-print(process_defect('Течь сифона'))
+print(process_defect('Течь сифона', "on"))

@@ -26,3 +26,28 @@
 - получить статус на данный момент и дату изменения
 - включить дефект - читай, изменить одно значени
 - отключить дефект - то же самое. Это значение в столбце status
+
+## Работа с докер-контейнером, в котором лежит бд postgesql, через терминал
+
+Команда, которой я разворачивала бд:
+*sudo docker run --name defect_status-pg -e POSTGRES_PASSWORD=adventus -p 5432:5432 -d postgres*
+
+Команда на проверку имеющихся работающих контейнеров
+*sudo docker ps*
+conteiner_id = **< пример номера e1c7953eb64b>**
+
+Команда, которой подключится к докер-контейнеру для раюоты с бд
+*sudo docker exec -it defect_status-pg psql -U postgres*
+Выведет *psql (17.4 (Debian 17.4-1.pgdg120+2))* и перекинет в оболочку postrges
+Подсказки по postgres **\\?** и выйти оттуда - **q**
+Выйти из postrgres - **\\q**
+
+Посмотреть порт
+*sudo docker port defect_status-pg*
+Найти IP адрес, ключ IPAddress
+*sudo docker inspect defect_status-pg*
+"IPAddress": "172.17.0.2"
+
+Порты:
+5432/tcp -> 0.0.0.0:5432
+5432/tcp -> [::]:5432
