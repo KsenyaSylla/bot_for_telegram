@@ -1,5 +1,8 @@
 defect,status,history
-2258,off,
+2258,off,"{
+  ""on"": ""27 Mar. 2025"",
+  ""off"": ""27 Mar. 2025""
+}"
 2242,on,
 1677,on,
 2517,off,

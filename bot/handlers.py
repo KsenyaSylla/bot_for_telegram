@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from .work_with_csv import *
+from config import ALLOWED_USERS
 
 #import menu
 #хорошо было бы прикрутить менюшку, дабы не прописывать возможные варианты работы с дефектами ручками
@@ -13,6 +14,12 @@ class UserInput(StatesGroup):
     off = State()
     status = State()
     history = State()
+    info = State()
+
+# Фильтр доступа
+@router.message(lambda message: message.from_user.id not in ALLOWED_USERS)
+async def access_denied(message: Message):
+    await message.answer("⛔ Доступ запрещён. Вы не в списке разрешённых пользователей.")
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
@@ -68,6 +75,19 @@ async def history_handler(msg: Message, state: FSMContext):
 async def history(message: Message, state: FSMContext):
     if message.text:
         await message.answer(f"Дефект: {message.text}\n{show_history(message.text)}")
+        await state.clear()
+    else:
+        await message.answer("Пожалуйста, введите дефект")
+
+@router.message(Command("defect_info"))
+async def defect_info_handler(msg: Message, state: FSMContext):
+    await msg.answer("для какого дефекта нужен код или название по коду?")
+    await state.set_state(UserInput.info)
+
+@router.message(UserInput.info)
+async def defect_info(message: Message, state: FSMContext):
+    if message.text:
+        await message.answer(f"По запросу: {message.text}\n{get_defect_info(message.text)}")
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
