@@ -3,7 +3,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from work_with_csv import *
+from .work_with_csv import *
 
 #import menu
 #хорошо было бы прикрутить менюшку, дабы не прописывать возможные варианты работы с дефектами ручками
@@ -38,7 +38,7 @@ async def  which_defect_off(msg: Message, state: FSMContext):
     await msg.answer("Какой дефект отключить?")
     await state.set_state(UserInput.off)
 
-@router.message(UserInput.string)
+@router.message(UserInput.off)
 async def defect_off(message: Message, state: FSMContext):
     if message.text:
         await message.answer(f"Дефект: {message.text}\n{update_status(message.text, "off")}")
@@ -67,7 +67,7 @@ async def history_handler(msg: Message, state: FSMContext):
 @router.message(UserInput.history)
 async def history(message: Message, state: FSMContext):
     if message.text:
-        await message.answer(f"Дефект: {message.text}\n{get_history(message.text)}")
+        await message.answer(f"Дефект: {message.text}\n{show_history(message.text)}")
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")

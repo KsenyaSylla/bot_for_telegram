@@ -2,26 +2,28 @@ from datetime import datetime
 
 def take_date():
     month = {
-        '01' : 'января',
-        '02' : 'февраля',
-        '03' : 'марта',
-        '04' : 'апреля',
-        '05' : 'мая',
-        '06' : 'июня',
-        '07' : 'июля',
-        '08' : 'августа',
-        '09' : 'сентября',
-        '10' : 'октября',
-        '11' : 'ноября',
-        '12' : 'декабря'
+        '01' : 'Jan.',
+        '02' : 'Feb.',
+        '03' : 'Mar.',
+        '04' : 'Apr.',
+        '05' : 'May',
+        '06' : 'Jun.',
+        '07' : 'Jul.',
+        '08' : 'Avg.',
+        '09' : 'Sep.',
+        '10' : 'Okt.',
+        '11' : 'Nov.',
+        '12' : 'Dec.'
     }
     now = datetime.now()
     today = now.strftime("%d-%m-%Y")
     today = today.split('-')
     number_of_month = today[1]
-    month_name = month[number_of_month]
-    date_to_save = f'{today[0] } {month_name} {today[2]}'
-    return date_to_save
+    month_name = str(month[number_of_month])
+    num_day = str(today[0])
+    num_year = str(today[2])
+    date_to_save = f'{num_day} {month_name} {num_year}'
+    return str(date_to_save)
 
 
 #сохранять историю в json строку в БД дефект "номер" включен/отключен "дата"
