@@ -32,7 +32,7 @@ async def which_defect_on(msg: Message, state: FSMContext):
 @router.message(UserInput.on)
 async def defect_on(message: Message, state: FSMContext):
     if message.text:
-        await message.answer(f"Дефект: {message.text}\n{update_status(message.text, "on")}")
+        await message.answer(f"Дефект: {message.text}\n{update_status(message.text, 'on')}")
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
@@ -45,7 +45,7 @@ async def  which_defect_off(msg: Message, state: FSMContext):
 @router.message(UserInput.off)
 async def defect_off(message: Message, state: FSMContext):
     if message.text:
-        await message.answer(f"Дефект: {message.text}\n{update_status(message.text, "off")}")
+        await message.answer(f"Дефект: {message.text}\n{update_status(message.text, 'off')}")
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
@@ -88,8 +88,3 @@ async def defect_info(message: Message, state: FSMContext):
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
-""" 
-@router.message(Command('stop'))
-async def stop_command(message: Message):
-    active_users.discard(message.from_user.id)
-    await message.reply("Бот отключен. Чтобы снова включить, отправьте /start.") """
