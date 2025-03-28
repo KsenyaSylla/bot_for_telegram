@@ -1,13 +1,11 @@
 from aiogram import types, F, Router
 from aiogram.types import Message
-from aiogram.filters import Command
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from .work_with_csv import *
 from config import ALLOWED_USERS
 
-#import menu
-#хорошо было бы прикрутить менюшку, дабы не прописывать возможные варианты работы с дефектами ручками
 router = Router()
 class UserInput(StatesGroup):
     on = State()
@@ -21,10 +19,11 @@ class UserInput(StatesGroup):
 async def access_denied(message: Message):
     await message.answer("⛔ Доступ запрещён. Вы не в списке разрешённых пользователей.")
 
-@router.message(Command("start"))
+@router.message(CommandStart("start"))
 async def start_handler(msg: Message):
-    await msg.answer("Привет! Я помогу с включением и отключением дефектов, а также получению информации по их состоянию")#, reply_markup=menu.menu
-
+    #active_users.add(msg.from_user.id)
+    await msg.answer("Привет! Я помогу с включением и отключением дефектов, а также получению информации по их состоянию")
+    
 @router.message(Command("on"))
 async def which_defect_on(msg: Message, state: FSMContext):
     await msg.answer("Какой дефект включить?")
@@ -38,8 +37,6 @@ async def defect_on(message: Message, state: FSMContext):
     else:
         await message.answer("Пожалуйста, введите дефект")
     
-
-
 @router.message(Command("off"))
 async def  which_defect_off(msg: Message, state: FSMContext):
     await msg.answer("Какой дефект отключить?")
@@ -91,3 +88,8 @@ async def defect_info(message: Message, state: FSMContext):
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
+""" 
+@router.message(Command('stop'))
+async def stop_command(message: Message):
+    active_users.discard(message.from_user.id)
+    await message.reply("Бот отключен. Чтобы снова включить, отправьте /start.") """

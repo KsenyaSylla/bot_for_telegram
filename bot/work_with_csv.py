@@ -12,74 +12,72 @@ db = f"{root}/bot/utils/defect_data.csv"
 def update_status(defect_value, new_status):
     new_status = str(new_status)
     defect_value = get_defect_code(defect_value)
-    try:
-        df = pd.read_csv(db, dtype={'status': 'string'})
-        old_status = str(get_status(defect_value))
-        if old_status == new_status:
-            message = f"Статус дефекта с кодом '{defect_value}' уже '{new_status}'"
-            return message
-        df.loc[df["defect"] == defect_value, "status"] = new_status
-        try:
-            df.to_csv(db, index=False, encoding='utf-8')
-        except Exception as e:
-            print("Ошибка при сохранении:", e)
-
-        #df.to_csv(db, index=False)
-        update_history(defect_value, new_status)
-        message = f"Статус дефекта с кодом '{defect_value}' изменен на '{new_status}'"
+    if defect_value == "Дефект не найден":
+        return defect_value
+    df = pd.read_csv(db, dtype={'status': 'string'})
+    old_status = str(get_status(defect_value))
+    if old_status == new_status:
+        message = f"Статус дефекта с кодом '{defect_value}' уже '{new_status}'"
         return message
+    df.loc[df["defect"] == defect_value, "status"] = new_status
+    try:
+        df.to_csv(db, index=False, encoding='utf-8')
     except Exception as e:
-        print(f"Ошибка обновления статуса дефекта {e}")
+        print("Ошибка при сохранении:", e)
+
+    #df.to_csv(db, index=False)
+    update_history(defect_value, new_status)
+    message = f"Статус дефекта с кодом '{defect_value}' изменен на '{new_status}'"
+    return message
+
 
 def update_history(defect, new_status): #история храниться в json, в python обрабатывается как словарь
+    defect_code = get_defect_code(defect)
+    history_old = get_history(defect_code)#словарь
+    history_for_update = store_defect_history(new_status)#словарь
+    updated_history = {**history_old, **history_for_update}#скленный словарь
+    updated_history_json = json.dumps(updated_history, indent=len(updated_history))#херачим json
+    updated_history = str(updated_history_json)#теперь строку, чтобы не плодить ошибки
+    df = pd.read_csv(db, dtype={'history': 'string'})
+    df.loc[df["defect"] == defect_code, "history"] = updated_history
     try:
-        defect_code = get_defect_code(defect)
-        history_old = get_history(defect_code)#словарь
-        history_for_update = store_defect_history(new_status)#словарь
-        updated_history = {**history_old, **history_for_update}#скленный словарь
-        updated_history_json = json.dumps(updated_history, indent=len(updated_history))#херачим json
-        updated_history = str(updated_history_json)#теперь строку, чтобы не плодить ошибки
-        df = pd.read_csv(db, dtype={'history': 'string'})
-        df.loc[df["defect"] == defect_code, "history"] = updated_history
-        try:
-            df.to_csv(db, index=False, encoding='utf-8')
-        except Exception as e:
-            print("Ошибка при сохранении:", e)
-        #df.to_csv(db, index=False)
-        message = f"Успешно обновлена история статусов дефекта '{defect}'"
-        return message
+        df.to_csv(db, index=False, encoding='utf-8')
     except Exception as e:
-        print(f'Ошибка при обновлении истории статусов {e}')
+        print("Ошибка при сохранении:", e)
+    #df.to_csv(db, index=False)
+    message = f"Успешно обновлена история статусов дефекта '{defect}'"
+    return message
 
 def get_history(defect_value):
-    try:
-        defect_value = get_defect_code(defect_value)
-        df = pd.read_csv(db)
-        row = df[df['defect'] == defect_value]
-        if not row.empty:
-            result = row.iloc[0]['history']#ожидаю здесь json
-            if pd.isna(result) or result == '':
-                result = dict()
-                return result
-            result = json.loads(result)#делаем из json словарь
+    defect_value = get_defect_code(defect_value)
+    if defect_value == "Дефект не найден":
+        return defect_value
+    df = pd.read_csv(db)
+    row = df[df['defect'] == defect_value]
+    if not row.empty:
+        result = row.iloc[0]['history']#ожидаю здесь json
+        if pd.isna(result) or result == '':
+            result = dict()
             return result
-        return dict()
+        result = json.loads(result)#делаем из json словарь
+        return result
+    return dict()
         
-    except Exception as e:
-        print(f'Ошибка при получении истории статусов {e}')
 
 def get_status(defect_value):    
-    try:
-        defect_value = get_defect_code(defect_value)
-        df = pd.read_csv(db)
-        result = df[df['defect'].astype(str).str.contains(str(defect_value), na=False)]
-        result = str(result['status'].iloc[0])
-        return result
-    except Exception as e:
-        print(f'Ошибка при получении статуса {e}')
+    defect_value = get_defect_code(defect_value)
+    if defect_value == "Дефект не найден":
+        return defect_value
+    df = pd.read_csv(db)
+    result = df[df['defect'].astype(str).str.contains(str(defect_value), na=False)]
+    result = str(result['status'].iloc[0])
+    return result
 
 def show_history(defect_value):
-    history = get_history(get_defect_code(defect_value))
+    defect_value = get_defect_code(defect_value)
+    if defect_value == "Дефект не найден":
+        return defect_value
+    history = get_history(defect_value)
     if history == {}:
         message = f"История дефекта '{defect_value}' пуста"
         return message
