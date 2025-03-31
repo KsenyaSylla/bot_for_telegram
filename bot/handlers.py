@@ -3,7 +3,8 @@ from aiogram.types import Message
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from .work_with_csv import *
+#from work_with_csv import *
+from db import *
 from config import ALLOWED_USERS
 
 router = Router()

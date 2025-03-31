@@ -1,11 +1,11 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, types
-from config import TOKEN
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from bot.handlers import router
+from handlers import router
+from config import TOKEN
 
 async def main():
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

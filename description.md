@@ -28,27 +28,22 @@
 - включить дефект - читай, изменить одно значени
 - отключить дефект - то же самое. Это значение в столбце status
 
-## Работа с докер-контейнером, в котором лежит бд postgesql, через терминал
+## Запускаем контейнеры
 
-Команда, которой я разворачивала бд:
-*sudo docker run --name defect_status-pg -e POSTGRES_PASSWORD=adventus -p 5432:5432 -d postgres*
+docker-compose up -d
 
-Команда на проверку имеющихся работающих контейнеров
-*sudo docker ps*
-conteiner_id = **< пример номера e1c7953eb64b>**
+## Проверяем, что файл CSV есть в контейнере
 
-Команда, которой подключится к докер-контейнеру для раюоты с бд
-*sudo docker exec -it defect_status-pg psql -U postgres*
-Выведет *psql (17.4 (Debian 17.4-1.pgdg120+2))* и перекинет в оболочку postrges
-Подсказки по postgres **\\?** и выйти оттуда - **q**
-Выйти из postrgres - **\\q**
+docker exec -it postgres_db ls -l /docker-entrypoint-initdb.d/
 
-Посмотреть порт
-*sudo docker port defect_status-pg*
-Найти IP адрес, ключ IPAddress
-*sudo docker inspect defect_status-pg*
-"IPAddress": "172.17.0.2"
+## Подключаемся к базе
 
-Порты:
-5432/tcp -> 0.0.0.0:5432
-5432/tcp -> [::]:5432
+docker exec -it postgres_db psql -U postgres -d mydatabase
+
+## Импортируем CSV в таблицу
+
+\COPY defects FROM '/docker-entrypoint-initdb.d/data.csv' DELIMITER ',' CSV HEADER;
+
+## Проверяем, что данные добавились
+
+SELECT * FROM defects;

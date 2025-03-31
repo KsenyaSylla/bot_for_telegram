@@ -1,17 +1,32 @@
-version: "3.9"
+version: '3.8'
+
 services:
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: "defects"
-      POSTGRES_USER: "defect_bot"
-      POSTGRES_PASSWORD: "zadolbalas"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ../2. Init Database:/docker-entrypoint-initdb.d
-      - defects-data:/var/lib/postgresql/data
+  db:
+    image: postgres:latest  # Используем официальный образ PostgreSQL 15
+    container_name: postgres_db
+    restart: always  # Перезапуск при сбое
+    env_file: .env  # Подгружаем переменные окружения (пароли, логины)
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Прокидываем порт для подключения с локальной машины
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Храним данные БД между перезапусками
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql  # Автоматическая инициализация БД
+      - ./data.csv:/docker-entrypoint-initdb.d/data.csv
+    networks:
+      - bot_network  # Общая сеть для взаимодействия бота и БД
+
+  bot:
+    build: .  # Собираем образ из Dockerfile
+    container_name: defects_bot
+    restart: always  # Автоматический перезапуск при сбое
+    env_file: .env  # Подключаем переменные окружения
+    depends_on:
+      - db  # Ждём, пока запустится база данных
+    networks:
+      - bot_network  # Та же сеть, что и у базы, для связи
 
 volumes:
-  defects-data:
+  pgdata:  # Определяем volume для хранения данных БД
+
+networks:
+  bot_network:  # Общая сеть для бота и базы

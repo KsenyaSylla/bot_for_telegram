@@ -1,7 +1,7 @@
 import pandas as pd
 import json
-from .utils.save_defect_history import store_defect_history
-from .utils.check_defect import *
+from utils.save_defect_history import store_defect_history
+from utils.check_defect import *
 from pathlib import Path
 
 root = Path.cwd()
