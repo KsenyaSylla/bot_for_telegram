@@ -2,4 +2,5 @@ test
 venv
 config.py
 .venv
+.env
 primer
