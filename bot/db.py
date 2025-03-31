@@ -26,7 +26,7 @@ def update_status(defect_value, new_status):
         cursor = conn.cursor()
         # SQL-запрос для обновления
         query = """
-        UPDATE defects_status
+        UPDATE defects
         SET status = %s,
         history = %s
         WHERE defect = %s;
@@ -62,7 +62,7 @@ def get_history(defect_value):
         cursor = conn.cursor()
 
         # Безопасный SQL-запрос с параметром
-        query = "SELECT history FROM your_table WHERE defect = ?"
+        query = "SELECT history FROM defects WHERE defect = %s"
         cursor.execute(query, (defect_value,))
 
         results = cursor.fetchall()
@@ -96,7 +96,7 @@ def get_status(defect_value):
         cursor = conn.cursor()
 
         # Безопасный SQL-запрос с параметром
-        query = "SELECT status FROM your_table WHERE defect = ?"
+        query = "SELECT status FROM defects WHERE defect = %s"
         cursor.execute(query, (defect_value,))
 
         result = cursor.fetchone()

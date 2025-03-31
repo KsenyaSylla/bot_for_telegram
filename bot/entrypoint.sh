@@ -3,4 +3,4 @@ echo "Ожидание PostgreSQL..."
 sleep 5  # Даём время базе данных запуститься
 
 echo "Запуск бота..."
-python bot.py
+python main.py

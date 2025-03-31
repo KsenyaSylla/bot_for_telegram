@@ -47,3 +47,13 @@ docker exec -it postgres_db psql -U bot_user -d defects
 ## Проверяем, что данные добавились
 
 SELECT * FROM defects;
+
+## Если БД была создана с ошибкой
+
+надо чистить volumes
+sudo docker volume ls
+sudo docker volume rm <имя volume>
+
+## смотреть логи контейнеров
+
+docker logs -f <айди контейнера>
