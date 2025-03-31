@@ -38,7 +38,7 @@ docker exec -it postgres_db ls -l /docker-entrypoint-initdb.d/
 
 ## Подключаемся к базе
 
-docker exec -it postgres_db psql -U postgres -d mydatabase
+docker exec -it postgres_db psql -U bot_user -d defects
 
 ## Импортируем CSV в таблицу
 

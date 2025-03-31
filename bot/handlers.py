@@ -77,7 +77,7 @@ async def history(message: Message, state: FSMContext):
     else:
         await message.answer("Пожалуйста, введите дефект")
 
-@router.message(Command("defect_info"))
+@router.message(Command("defect_info"))# обращается к питоновскому словарю, не к БД
 async def defect_info_handler(msg: Message, state: FSMContext):
     await msg.answer("для какого дефекта нужен код или название по коду?")
     await state.set_state(UserInput.info)

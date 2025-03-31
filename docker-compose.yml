@@ -10,7 +10,7 @@ services:
       - "5432:5432"  # Прокидываем порт для подключения с локальной машины
     volumes:
       - pgdata:/var/lib/postgresql/data  # Храним данные БД между перезапусками
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql  # Автоматическая инициализация БД
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql # Автоматическая инициализация БД
       - ./data.csv:/docker-entrypoint-initdb.d/data.csv
     networks:
       - bot_network  # Общая сеть для взаимодействия бота и БД
