@@ -18,7 +18,7 @@ def update_status(defect_value, new_status):
         return message
     try:
         history = get_updated_history(defect_value, new_status)
-    except:
+    except Exception as e:
         print(f'Ошибка при получении обновленной истории: {e}')
     try:
         # Подключение к БД
@@ -62,14 +62,23 @@ def get_history(defect_value):
         cursor = conn.cursor()
 
         # Безопасный SQL-запрос с параметром
-        query = "SELECT history FROM defects WHERE defect = %s"
+        query = "SELECT COALESCE(history, '') FROM defects WHERE defect = %s"
         cursor.execute(query, (defect_value,))
 
         results = cursor.fetchall()
+        if results is None:  # Если запись не найдена
+            return {}
+        
+        history = results[0]  # Получаем значение из первой колонки
+        if history == '':  # Если ячейка была NULL, теперь это пустая строка
+            return {}
 
-        for row in results:
-            history_data = json.loads(row[0])  # Преобразуем строку JSON в объект Python, скорее всего словарь
-        return history_data
+         # Преобразуем JSON в словарь
+        try:
+            return json.loads(history)
+        except json.JSONDecodeError:
+            print(f"Ошибка декодирования JSON для дефекта {defect_value}: {history}")
+            return {}
 
     except Exception as e:
         print("Ошибка при получении истории:", e)
@@ -80,7 +89,6 @@ def get_history(defect_value):
         if conn:
             conn.close()
 
-#show_history(message.text)
 
 def connect_db():
     try:
@@ -89,7 +97,7 @@ def connect_db():
     except psycopg2.Error as e:
         print(f"Ошибка подключения: {e}")
 
-def get_status(defect_value):
+def get_status(defect_value):# РАБОТАЕТ!
     defect_value = get_defect_code(defect_value)
     try:
         conn = connect_db()
@@ -124,7 +132,7 @@ def show_history(defect_value):
     message = f"История дефекта '{defect_value}':\n{history}"
     return message
 
-def get_defect_info(defect):
+def get_defect_info(defect):# РАБОТАЕТ!
     defect_code = get_defect_code(defect)
     if is_number(defect):
         defect_name = get_defect_name(defect)
