@@ -4,3 +4,4 @@ config.py
 .venv
 .env
 primer
+bot/dict_of_defects/credentials.json
