@@ -6,6 +6,7 @@ from utils.check_defect import *
 from config import DB_CONFIG
 
 def update_status(defect_value, new_status):
+    cursor = None
     """Обновляет значение status в таблице defects_status по значению defect."""
     defect_value = get_defect_code(defect_value)# запрос к питонячьему словарю
     #если статус новый совпадает со старым, то нужно об этом оповесстить и не обновлять ничего!
@@ -16,10 +17,8 @@ def update_status(defect_value, new_status):
     if old_status == new_status:
         message = f"Статус дефекта с кодом '{defect_value}' уже '{new_status}'"
         return message
-    try:
-        history = get_updated_history(defect_value, new_status)
-    except Exception as e:
-        print(f'Ошибка при получении обновленной истории: {e}')
+    history = get_updated_history(defect_value, new_status)
+
     try:
         # Подключение к БД
         conn = connect_db()
@@ -31,7 +30,6 @@ def update_status(defect_value, new_status):
         history = %s
         WHERE defect = %s;
         """
-        
         # Выполнение запроса
         cursor.execute(query, (new_status, history, defect_value))
         conn.commit()
@@ -53,32 +51,29 @@ def get_updated_history(defect, new_status): #история храниться 
     history_for_update = store_defect_history(new_status)
     updated_history = {**history_old, **history_for_update}#скленный словарь
     updated_history_json = json.dumps(updated_history, indent=len(updated_history))#херачим json
-    updated_history = str(updated_history_json)#теперь строку, чтобы не плодить ошибки
-    return updated_history
+    return updated_history_json
 
 def get_history(defect_value):
+    cursor = None
     try:
         conn = connect_db()
+        if conn is None:
+            raise ValueError("Ошибка: Подключение к БД не установлено")
         cursor = conn.cursor()
 
         # Безопасный SQL-запрос с параметром
-        query = "SELECT COALESCE(history, '') FROM defects WHERE defect = %s"
+        query = "SELECT COALESCE(history, '{}'::jsonb) FROM defects WHERE defect = %s"
         cursor.execute(query, (defect_value,))
-
         results = cursor.fetchall()
-        if results is None:  # Если запись не найдена
+        if not results:  # Если запись не найдена
             return {}
         
-        history = results[0]  # Получаем значение из первой колонки
-        if history == '':  # Если ячейка была NULL, теперь это пустая строка
+        history = results[0][0]  # Получаем значение из первой колонки
+        if history == {}:  # Если ячейка была NULL, теперь это пустая строка
             return {}
 
          # Преобразуем JSON в словарь
-        try:
-            return json.loads(history)
-        except json.JSONDecodeError:
-            print(f"Ошибка декодирования JSON для дефекта {defect_value}: {history}")
-            return {}
+        return history
 
     except Exception as e:
         print("Ошибка при получении истории:", e)
@@ -97,12 +92,12 @@ def connect_db():
     except psycopg2.Error as e:
         print(f"Ошибка подключения: {e}")
 
-def get_status(defect_value):# РАБОТАЕТ!
+def get_status(defect_value):# РАБОТАЕТ!\
+    cursor = None
     defect_value = get_defect_code(defect_value)
     try:
         conn = connect_db()
         cursor = conn.cursor()
-
         # Безопасный SQL-запрос с параметром
         query = "SELECT status FROM defects WHERE defect = %s"
         cursor.execute(query, (defect_value,))
@@ -125,9 +120,10 @@ def show_history(defect_value):
     if defect_value == "Дефект не найден":
         return defect_value
     history = get_history(defect_value)
-    if history == {}:
+    if history == {} or not history:
         message = f"История дефекта '{defect_value}' пуста"
         return message
+
     history = json.dumps(history, indent=len(history))
     message = f"История дефекта '{defect_value}':\n{history}"
     return message
@@ -144,6 +140,7 @@ def get_defect_info(defect):# РАБОТАЕТ!
     message = f'Дефект "{defect}"\nкод = {defect_code}'
     return message
 
+get_history('2258')
 """
 def process_defect(resieved_str, action):
     try:
