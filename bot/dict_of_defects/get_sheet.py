@@ -6,7 +6,7 @@ from pathlib import Path
 root = Path.cwd() # /home/ksylla/defects_bot
 # Настройки доступа
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-CREDS_FILE = f"{root}/bot/dict_of_defects/credentials.json"  # Укажите путь к вашему JSON-файлу
+CREDS_FILE = f"{root}/dict_of_defects/credentials.json"  # Укажите путь к вашему JSON-файлу
 
 # ID Google-таблицы (находится в URL)
 SPREADSHEET_ID = "1zb3DUkAjGbdWnsLEVBGv1VNWa7pnLSxuxf-gyuHptcc"

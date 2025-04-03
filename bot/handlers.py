@@ -1,11 +1,11 @@
 from aiogram import types, F, Router
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-#from work_with_csv import *
 from db import *
 from config import ALLOWED_USERS
+from dict_of_defects.compare_dict import get_message_about_updates, update_dict
 
 router = Router()
 class UserInput(StatesGroup):
@@ -14,6 +14,7 @@ class UserInput(StatesGroup):
     status = State()
     history = State()
     info = State()
+    confirm_update_dict = State()
 
 # Фильтр доступа
 @router.message(lambda message: message.from_user.id not in ALLOWED_USERS)
@@ -89,3 +90,29 @@ async def defect_info(message: Message, state: FSMContext):
         await state.clear()
     else:
         await message.answer("Пожалуйста, введите дефект")
+
+@router.message(Command("check_updates"))# получает данные из таблицы в гугле и сравнивает с имеющимися
+async def defect_info_handler(msg: Message):
+    await msg.answer(f"{get_message_about_updates()}")
+
+@router.message(Command("update_dict"))# запрашивает подтверждение на обновление словаря и обновляет при подтверждении
+async def defect_info_handler(msg: Message, state: FSMContext):
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="ДА"), KeyboardButton(text="НЕТ")]
+        ],
+        resize_keyboard=True,  # Подгоняем размер кнопок
+        one_time_keyboard=True  # Скрываем после нажатия
+    )
+    await msg.answer('Вы уверены, что хотите обновить словарь кодов и названий дефектов?', reply_markup=keyboard)
+    await state.set_state(UserInput.confirm_update_dict)
+
+@router.message(UserInput.confirm_update_dict)
+async def defect_info(message: Message, state: FSMContext):
+    if message.text.lower() == 'да':
+        await message.answer(f"{update_dict()}", reply_markup=ReplyKeyboardRemove())
+        await state.clear()
+    else:
+        await message.answer("Вы отказались обновлять словарь дефектов", reply_markup=ReplyKeyboardRemove())
+        await state.clear()
+    

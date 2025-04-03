@@ -24,6 +24,19 @@ services:
       - db  # Ждём, пока запустится база данных
     networks:
       - bot_network  # Та же сеть, что и у базы, для связи
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api
+    container_name: fastapi_service
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - bot_network
 
 volumes:
   pgdata:  # Определяем volume для хранения данных БД

@@ -1,4 +1,4 @@
-from get_sheet import download_google_sheet as dgs
+from .get_sheet import download_google_sheet as dgs
 
 def make_dict_of_defects():
     input_df = dgs()
