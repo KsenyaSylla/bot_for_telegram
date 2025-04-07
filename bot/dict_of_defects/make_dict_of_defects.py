@@ -10,5 +10,5 @@ def make_dict_of_statuses():
     input_df = dgs()
     required_columns = ["Код дефекта", "Статус обслуживания на роботе"]
     filtered_df = input_df[required_columns]
-    print(filtered_df.head())
+    #print(filtered_df.head())
     return filtered_df.set_index["Код дефекта", "Статус обслуживания на роботе"].to_dict()
