@@ -5,3 +5,4 @@ config.py
 .env
 primer
 bot/dict_of_defects/credentials.json
+.env
