@@ -1,22 +1,29 @@
 from fastapi import FastAPI, Depends, HTTPException
+import asyncio
+import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession
-from db import get_db, engine
+from db import get_db, engine #test_connection #
 from models import Base
 from schemas import DefectResponse
 from crud import get_defect_status
 
+
 app = FastAPI()
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, loop="asyncio")
+
+""" @app.get("/")
+def read_root():
+    return {"result": test_connection()}
+""" 
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to FastAPI!"}
 
 @app.get("/status/{defect_id}", response_model=DefectResponse)
 async def get_status(defect_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Получает статус дефекта по его ID.
-    """
+ 
     defect = await get_defect_status(db, defect_id)
     
     if not defect:

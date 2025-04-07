@@ -1,12 +1,16 @@
 import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@db:5432/mydb")
-
+DATABASE_URL = os.getenv("DATABASE_URL")
+print("📡 DATABASE_URL =", DATABASE_URL)
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
+    try:
+        async with AsyncSessionLocal() as session:
+            yield session
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Ошибка подключения: {e}")

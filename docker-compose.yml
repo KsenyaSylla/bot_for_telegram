@@ -43,3 +43,4 @@ volumes:
 
 networks:
   bot_network:  # Общая сеть для бота и базы
+    driver: bridge
