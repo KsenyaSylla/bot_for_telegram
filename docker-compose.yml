@@ -2,35 +2,65 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:latest  # Используем официальный образ PostgreSQL 15
+    image: postgres:latest
     container_name: postgres_db
-    restart: always  # Перезапуск при сбое
-    env_file: .env  # Подгружаем переменные окружения (пароли, логины)
+    restart: always
+    #env_file: .env  # Подгружаем переменные окружения (пароли, логины)
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - "5432:5432"  # Прокидываем порт для подключения с локальной машины
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data  # Храним данные БД между перезапусками
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql # Автоматическая инициализация БД
+      - pgdata:/var/lib/postgresql/data 
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
       - ./data.csv:/docker-entrypoint-initdb.d/data.csv
     networks:
-      - bot_network  # Общая сеть для взаимодействия бота и БД
+      - bot_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 13s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   bot:
-    build: .  # Собираем образ из Dockerfile
+    build: .
     container_name: defects_bot
-    restart: always  # Автоматический перезапуск при сбое
-    env_file: .env  # Подключаем переменные окружения
+    restart: always
+    #env_file: .env  # Подключаем переменные окружения
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - TYPE=${TYPE}
+      - PROJECT_ID=${PROJECT_ID}
+      - PRIVATE_KEY_ID=${PRIVATE_KEY_ID}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - CLIENT_EMAIL=${CLIENT_EMAIL}
+      - CLIENT_ID=${CLIENT_ID}
+      - AUTH_URI=${AUTH_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - AUTH_PROVIDER_X509_CERT_URL=${AUTH_PROVIDER_X509_CERT_URL}
+      - CLIENT_X509_CERT_URL=${CLIENT_X509_CERT_URL}
+      - UNIVERSE_DOMAIN=${UNIVERSE_DOMAIN}
     depends_on:
-      - db  # Ждём, пока запустится база данных
+      - db
     networks:
-      - bot_network  # Та же сеть, что и у базы, для связи
+      - bot_network
   api:
     build:
       context: ./api
       dockerfile: Dockerfile.api
     container_name: fastapi_service
     restart: always
-    env_file: .env
+    #env_file: .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8000:8000"
     depends_on:
@@ -39,7 +69,7 @@ services:
       - bot_network
 
 volumes:
-  pgdata:  # Определяем volume для хранения данных БД
+  pgdata:  #по умолчанию сейчас
 
 networks:
   bot_network:  # Общая сеть для бота и базы

@@ -3,9 +3,6 @@ import os
 import json
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
-from dotenv import load_dotenv
-load_dotenv()
-
 
 # Настройки доступа
 CREDS_DICT = json.dumps({
