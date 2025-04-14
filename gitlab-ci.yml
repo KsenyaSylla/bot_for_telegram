@@ -1,0 +1,55 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - test
+  - deploy
+
+before_script:
+  - apk add --no-cache docker-compose postgresql-client curl
+
+test:
+  stage: test
+  script:
+    - echo "⚙️ Запускаем только БД"
+    - docker-compose up -d db
+    - echo "⏳ Ждём готовности БД..."
+    - |
+      for i in {1..15}; do
+        if docker exec postgres_db pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"; then
+          echo "✅ БД готова"
+          break
+        else
+          echo "⏱ Попытка $i — жду..."
+          sleep 5
+        fi
+      done
+    - echo "🔍 Проверка — пуста ли таблица"
+    - |
+      if docker exec -e PGPASSWORD=$POSTGRES_PASSWORD postgres_db psql -U $POSTGRES_USER -d $POSTGRES_DB -tAc "SELECT count(*) FROM users;" | grep -q '^0'; then
+        echo "📥 Пусто — загружаем данные из CSV"
+        # Файл уже смонтирован в volume, поэтому init-db.sql автоматически запустится
+        # Можно и вручную:
+        docker exec -e PGPASSWORD=$POSTGRES_PASSWORD postgres_db psql -U $POSTGRES_USER -d $POSTGRES_DB -f /docker-entrypoint-initdb.d/init-db.sql
+      else
+        echo "✅ Таблица не пуста, пропускаем импорт"
+      fi
+    - echo "Погнали дальше"
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Запускаем бота и апи"
+    - docker-compose up -d --build defects_bot fastapi_service
+  only:
+    - main
+  needs:
+    - job: test
+      artifacts: false
